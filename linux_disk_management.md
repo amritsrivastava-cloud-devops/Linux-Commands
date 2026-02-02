@@ -77,9 +77,8 @@
 <img width="553" height="521" alt="image" src="https://github.com/user-attachments/assets/2c6349d5-ae69-448d-90eb-0260ca3f1552" />
 
 ## Using LVM with EBS for dynamic storage management
-
-Extend extra GB for existing logical volume 
-Command :lvextend -L +5G /dev/aws1_vg/aws1_lv
+#### Extend extra GB for existing logical volume 
+- Command :lvextend -L +5G /dev/aws1_vg/aws1_lv
 <img width="722" height="308" alt="image" src="https://github.com/user-attachments/assets/33e5b6f1-aa01-4ceb-afb1-8a2c7bbc2506" />
 <img width="547" height="306" alt="image" src="https://github.com/user-attachments/assets/a437f6b3-df09-4972-965c-c541bd30a86e" />
 <img width="537" height="251" alt="image" src="https://github.com/user-attachments/assets/42980043-3e36-4326-ad76-a822d2949b62" />
