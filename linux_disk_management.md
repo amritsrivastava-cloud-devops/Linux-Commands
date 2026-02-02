@@ -23,280 +23,64 @@
 
 ## Physical vs Logical Volumes vs Volume Groups in Linux
 
-Physical volume - 10g , 12 g , 14g 
-Volume group = 10gb + 12gb = 22gb
-Logical volume = extract from 22gb 
+- Physical volume - 10g , 12 g , 14g 
+- Volume group = 10gb + 12gb = 22gb
+- Logical volume = extract from 22gb 
 
-now lvm is managing all 3 physical volume , volume group , logical volume 
+- now lvm is managing all 3 physical volume , volume group , logical volume 
 
-## rough
+## Mounting Volumes in Linux
 
-root@ip-172-31-6-109:~# pvs
-root@ip-172-31-6-109:~# lsblk
-NAME         MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
-loop0          7:0    0   74M  1 loop /snap/core22/2163
-loop1          7:1    0 27.6M  1 loop /snap/amazon-ssm-agent/11797
-loop2          7:2    0 50.9M  1 loop /snap/snapd/25577
-nvme0n1      259:0    0    8G  0 disk
-├─nvme0n1p1  259:1    0    7G  0 part /
-├─nvme0n1p14 259:2    0    4M  0 part
-├─nvme0n1p15 259:3    0  106M  0 part /boot/efi
-└─nvme0n1p16 259:4    0  913M  0 part /boot
-nvme1n1      259:5    0   12G  0 disk
-nvme2n1      259:6    0   10G  0 disk
-nvme3n1      259:7    0   14G  0 disk
-root@ip-172-31-6-109:~# lvm
-lvm> pvcreate /dev/nvme1n1 /dev/nvme2n1 /dev/nvme3n1
-  Physical volume "/dev/nvme1n1" successfully created.
-  Physical volume "/dev/nvme2n1" successfully created.
-  Physical volume "/dev/nvme3n1" successfully created.
-lvm> pvs
-  PV           VG Fmt  Attr PSize  PFree
-  /dev/nvme1n1    lvm2 ---  12.00g 12.00g
-  /dev/nvme2n1    lvm2 ---  10.00g 10.00g
-  /dev/nvme3n1    lvm2 ---  14.00g 14.00g
-lvm> vgcreate aws1_vg /dev/nvme1n1 /dev/nvme2n1
-  Volume group "aws1_vg" successfully created
-lvm> vgs
-  VG      #PV #LV #SN Attr   VSize  VFree
-  aws1_vg   2   0   0 wz--n- 21.99g 21.99g
-lvm> lvcreate -L 9G -n aws1_lv aws1_vg
-  Logical volume "aws1_lv" created.
-lvm> lv
-  No such command 'lv'.  Try 'help'.
-lvm> pvdisplay
-  --- Physical volume ---
-  PV Name               /dev/nvme1n1
-  VG Name               aws1_vg
-  PV Size               12.00 GiB / not usable 4.00 MiB
-  Allocatable           yes
-  PE Size               4.00 MiB
-  Total PE              3071
-  Free PE               767
-  Allocated PE          2304
-  PV UUID               gixIzK-F1Z1-pnD4-d9ci-loBs-KPiM-YbyWQ4
+#### Creating physical volume 
+<img width="402" height="200" alt="image" src="https://github.com/user-attachments/assets/d3fbe4d0-2a1c-4f47-a7e2-00640041d2f2" />
 
-  --- Physical volume ---
-  PV Name               /dev/nvme2n1
-  VG Name               aws1_vg
-  PV Size               10.00 GiB / not usable 4.00 MiB
-  Allocatable           yes
-  PE Size               4.00 MiB
-  Total PE              2559
-  Free PE               2559
-  Allocated PE          0
-  PV UUID               XpvpLI-p7o5-jPAe-6PI6-7OoM-3FR3-9kj0TL
+#### Creating volume group
+<img width="355" height="104" alt="image" src="https://github.com/user-attachments/assets/4eb65d50-f4e3-4857-bd7d-e00ccadd9858" />
 
-  "/dev/nvme3n1" is a new physical volume of "14.00 GiB"
-  --- NEW Physical volume ---
-  PV Name               /dev/nvme3n1
-  VG Name
-  PV Size               14.00 GiB
-  Allocatable           NO
-  PE Size               0
-  Total PE              0
-  Free PE               0
-  Allocated PE          0
-  PV UUID               mX3GhV-Bn5J-UjVz-ccVC-vXby-T8Fz-CwaQek
+#### Creating logical volume
+<img width="279" height="46" alt="image" src="https://github.com/user-attachments/assets/1ba7b19a-0d8b-49c5-b049-111a364e3703" />
 
-lvm> vgdisplay
-  --- Volume group ---
-  VG Name               aws1_vg
-  System ID
-  Format                lvm2
-  Metadata Areas        2
-  Metadata Sequence No  2
-  VG Access             read/write
-  VG Status             resizable
-  MAX LV                0
-  Cur LV                1
-  Open LV               0
-  Max PV                0
-  Cur PV                2
-  Act PV                2
-  VG Size               21.99 GiB
-  PE Size               4.00 MiB
-  Total PE              5630
-  Alloc PE / Size       2304 / 9.00 GiB
-  Free  PE / Size       3326 / 12.99 GiB
-  VG UUID               T2UAip-bfLS-ozjO-GjfG-LD9Q-BUU3-0G557u
+## Introduction to LVM (Logical volume manager)
 
-lvm> exit
-  Exiting.
-root@ip-172-31-6-109:~# lsblk
-NAME              MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
-loop0               7:0    0   74M  1 loop /snap/core22/2163
-loop1               7:1    0 27.6M  1 loop /snap/amazon-ssm-agent/11797
-loop2               7:2    0 50.9M  1 loop /snap/snapd/25577
-nvme0n1           259:0    0    8G  0 disk
-├─nvme0n1p1       259:1    0    7G  0 part /
-├─nvme0n1p14      259:2    0    4M  0 part
-├─nvme0n1p15      259:3    0  106M  0 part /boot/efi
-└─nvme0n1p16      259:4    0  913M  0 part /boot
-nvme1n1           259:5    0   12G  0 disk
-└─aws1_vg-aws1_lv 252:0    0    9G  0 lvm
-nvme2n1           259:6    0   10G  0 disk
-nvme3n1           259:7    0   14G  0 disk
-root@ip-172-31-6-109:~# lvs
-  LV      VG      Attr       LSize Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
-  aws1_lv aws1_vg -wi-a----- 9.00g                                              
-root@ip-172-31-6-109:~# mkdir /mnt/aws1_lv_mount
-root@ip-172-31-6-109:~# mkfs.ext4 /dev/aws1_vg/aws1_lv
-mke2fs 1.47.0 (5-Feb-2023)
-Creating filesystem with 2359296 4k blocks and 589824 inodes
-Filesystem UUID: 10edd792-5a78-4c05-99b1-e397ff3f8f5f
-Superblock backups stored on blocks:
-        32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632
+#### In lvm we can use following commands 
+- pvs (display physical volume)
+- pvdisplay (physical volume description)
+- vgdisplay (volume group description)
+-  created logical volume 
+- lvs (list all logical volumes)
+<img width="598" height="66" alt="image" src="https://github.com/user-attachments/assets/5091dceb-bb96-474b-a06c-9194f417ec4d" />
 
-Allocating group tables: done
-Writing inode tables: done
-Creating journal (16384 blocks): done
-Writing superblocks and filesystem accounting information: done
+#### Create a mount point in /mnt directory for logical volume mount 
+- Format logical volume first 
+- Command :mkdir /mnt/aws1_lv_mount
+- Command :mkfs.ext4 /dev/aws1_vg/aws1_lv
+- Command :mount /dev/aws1_vg/aws1_lv /mnt/aws1_lv_mount/
+<img width="496" height="288" alt="image" src="https://github.com/user-attachments/assets/a15a9f36-439e-4f15-bd36-81b353a2b370" />
 
-root@ip-172-31-6-109:~# mount /dev/aws1_vg/aws1_lv /mnt/aws1_lv_mount/
-root@ip-172-31-6-109:~# lsblk
-NAME              MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
-loop0               7:0    0   74M  1 loop /snap/core22/2163
-loop1               7:1    0 27.6M  1 loop /snap/amazon-ssm-agent/11797
-loop2               7:2    0 50.9M  1 loop /snap/snapd/25577
-nvme0n1           259:0    0    8G  0 disk
-├─nvme0n1p1       259:1    0    7G  0 part /
-├─nvme0n1p14      259:2    0    4M  0 part
-├─nvme0n1p15      259:3    0  106M  0 part /boot/efi
-└─nvme0n1p16      259:4    0  913M  0 part /boot
-nvme1n1           259:5    0   12G  0 disk
-└─aws1_vg-aws1_lv 252:0    0    9G  0 lvm  /mnt/aws1_lv_mount
-nvme2n1           259:6    0   10G  0 disk
-nvme3n1           259:7    0   14G  0 disk
-root@ip-172-31-6-109:~# df -h
-Filesystem                   Size  Used Avail Use% Mounted on
-/dev/root                    6.8G  1.8G  5.0G  27% /
-tmpfs                        458M     0  458M   0% /dev/shm
-tmpfs                        183M  916K  182M   1% /run
-tmpfs                        5.0M     0  5.0M   0% /run/lock
-efivarfs                     128K  3.6K  120K   3% /sys/firmware/efi/efivars
-/dev/nvme0n1p16              881M   89M  730M  11% /boot
-/dev/nvme0n1p15              105M  6.2M   99M   6% /boot/efi
-tmpfs                         92M   12K   92M   1% /run/user/1000
-/dev/mapper/aws1_vg-aws1_lv  8.8G   24K  8.3G   1% /mnt/aws1_lv_mount
-root@ip-172-31-6-109:~# lsblk
-NAME              MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
-loop0               7:0    0   74M  1 loop /snap/core22/2163
-loop1               7:1    0 27.6M  1 loop /snap/amazon-ssm-agent/11797
-loop2               7:2    0 50.9M  1 loop /snap/snapd/25577
-nvme0n1           259:0    0    8G  0 disk
-├─nvme0n1p1       259:1    0    7G  0 part /
-├─nvme0n1p14      259:2    0    4M  0 part
-├─nvme0n1p15      259:3    0  106M  0 part /boot/efi
-└─nvme0n1p16      259:4    0  913M  0 part /boot
-nvme1n1           259:5    0   12G  0 disk
-└─aws1_vg-aws1_lv 252:0    0    9G  0 lvm  /mnt/aws1_lv_mount
-nvme2n1           259:6    0   10G  0 disk
-nvme3n1           259:7    0   14G  0 disk
-root@ip-172-31-6-109:~# mkdir /mnt/aws1_disk_mount
-root@ip-172-31-6-109:~# mkfs -t ext4 /dev/nvme3n1
-mke2fs 1.47.0 (5-Feb-2023)
-/dev/nvme3n1 contains a LVM2_member file system
-Proceed anyway? (y,N) y
-Creating filesystem with 3670016 4k blocks and 917504 inodes
-Filesystem UUID: f251f347-b32d-405f-8d82-5e6e195b0b9d
-Superblock backups stored on blocks:
-        32768, 98304, 163840, 229376, 294912, 819200, 884736, 1605632, 2654208
+#### List down using lsblk command 
 
-Allocating group tables: done
-Writing inode tables: done
-Creating journal (16384 blocks): done
-Writing superblocks and filesystem accounting information: done
+<img width="566" height="533" alt="image" src="https://github.com/user-attachments/assets/92b6185d-2fb7-4f38-b67f-786e2535d8f6" />
 
-root@ip-172-31-6-109:~# mount /dev/nvme3n1 /mnt/aws1_disk_mount/
-root@ip-172-31-6-109:~# df -h
-Filesystem                   Size  Used Avail Use% Mounted on
-/dev/root                    6.8G  1.8G  5.0G  27% /
-tmpfs                        458M     0  458M   0% /dev/shm
-tmpfs                        183M  916K  182M   1% /run
-tmpfs                        5.0M     0  5.0M   0% /run/lock
-efivarfs                     128K  3.6K  120K   3% /sys/firmware/efi/efivars
-/dev/nvme0n1p16              881M   89M  730M  11% /boot
-/dev/nvme0n1p15              105M  6.2M   99M   6% /boot/efi
-tmpfs                         92M   12K   92M   1% /run/user/1000
-/dev/mapper/aws1_vg-aws1_lv  8.8G   24K  8.3G   1% /mnt/aws1_lv_mount
-/dev/nvme3n1                  14G   24K   13G   1% /mnt/aws1_disk_mount
-root@ip-172-31-6-109:~# lsblk
-NAME              MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
-loop0               7:0    0   74M  1 loop /snap/core22/2163
-loop1               7:1    0 27.6M  1 loop /snap/amazon-ssm-agent/11797
-loop2               7:2    0 50.9M  1 loop /snap/snapd/25577
-nvme0n1           259:0    0    8G  0 disk
-├─nvme0n1p1       259:1    0    7G  0 part /
-├─nvme0n1p14      259:2    0    4M  0 part
-├─nvme0n1p15      259:3    0  106M  0 part /boot/efi
-└─nvme0n1p16      259:4    0  913M  0 part /boot
-nvme1n1           259:5    0   12G  0 disk
-└─aws1_vg-aws1_lv 252:0    0    9G  0 lvm  /mnt/aws1_lv_mount
-nvme2n1           259:6    0   10G  0 disk
-nvme3n1           259:7    0   14G  0 disk /mnt/aws1_disk_mount
-root@ip-172-31-6-109:~# lvm
-lvm> lvs
-  LV      VG      Attr       LSize Pool Origin Data%  Meta%  Move Log Cpy%Sync Convert
-  aws1_lv aws1_vg -wi-ao---- 9.00g
-lvm> lgs
-  No such command 'lgs'.  Try 'help'.
-lvm> lvg
-  No such command 'lvg'.  Try 'help'.
-lvm> exit
-  Exiting.
-root@ip-172-31-6-109:~# df -h
-Filesystem                   Size  Used Avail Use% Mounted on
-/dev/root                    6.8G  1.8G  5.0G  27% /
-tmpfs                        458M     0  458M   0% /dev/shm
-tmpfs                        183M  916K  182M   1% /run
-tmpfs                        5.0M     0  5.0M   0% /run/lock
-efivarfs                     128K  3.6K  120K   3% /sys/firmware/efi/efivars
-/dev/nvme0n1p16              881M   89M  730M  11% /boot
-/dev/nvme0n1p15              105M  6.2M   99M   6% /boot/efi
-tmpfs                         92M   12K   92M   1% /run/user/1000
-/dev/mapper/aws1_vg-aws1_lv  8.8G   24K  8.3G   1% /mnt/aws1_lv_mount
-/dev/nvme3n1                  14G   24K   13G   1% /mnt/aws1_disk_mount
-root@ip-172-31-6-109:~# lvextend -L +5G /dev/aws1_vg/aws1_lv
-  Size of logical volume aws1_vg/aws1_lv changed from 9.00 GiB (2304 extents) to 14.00 GiB (3584 extents).
-  Logical volume aws1_vg/aws1_lv successfully resized.
-root@ip-172-31-6-109:~# df -h
-Filesystem                   Size  Used Avail Use% Mounted on
-/dev/root                    6.8G  1.8G  5.0G  27% /
-tmpfs                        458M     0  458M   0% /dev/shm
-tmpfs                        183M  916K  182M   1% /run
-tmpfs                        5.0M     0  5.0M   0% /run/lock
-efivarfs                     128K  3.6K  120K   3% /sys/firmware/efi/efivars
-/dev/nvme0n1p16              881M   89M  730M  11% /boot
-/dev/nvme0n1p15              105M  6.2M   99M   6% /boot/efi
-tmpfs                         92M   12K   92M   1% /run/user/1000
-/dev/mapper/aws1_vg-aws1_lv  8.8G   24K  8.3G   1% /mnt/aws1_lv_mount
-/dev/nvme3n1                  14G   24K   13G   1% /mnt/aws1_disk_mount
-root@ip-172-31-6-109:~# lsblk
-NAME              MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
-loop0               7:0    0   74M  1 loop /snap/core22/2163
-loop1               7:1    0 27.6M  1 loop /snap/amazon-ssm-agent/11797
-loop2               7:2    0 50.9M  1 loop /snap/snapd/25577
-nvme0n1           259:0    0    8G  0 disk
-├─nvme0n1p1       259:1    0    7G  0 part /
-├─nvme0n1p14      259:2    0    4M  0 part
-├─nvme0n1p15      259:3    0  106M  0 part /boot/efi
-└─nvme0n1p16      259:4    0  913M  0 part /boot
-nvme1n1           259:5    0   12G  0 disk
-└─aws1_vg-aws1_lv 252:0    0   14G  0 lvm  /mnt/aws1_lv_mount
-nvme2n1           259:6    0   10G  0 disk
-└─aws1_vg-aws1_lv 252:0    0   14G  0 lvm  /mnt/aws1_lv_mount
-nvme3n1           259:7    0   14G  0 disk /mnt/aws1_disk_mount
-root@ip-172-31-6-109:~# df -h
-Filesystem                   Size  Used Avail Use% Mounted on
-/dev/root                    6.8G  1.8G  5.0G  27% /
-tmpfs                        458M     0  458M   0% /dev/shm
-tmpfs                        183M  916K  182M   1% /run
-tmpfs                        5.0M     0  5.0M   0% /run/lock
-efivarfs                     128K  3.6K  120K   3% /sys/firmware/efi/efivars
-/dev/nvme0n1p16              881M   89M  730M  11% /boot
-/dev/nvme0n1p15              105M  6.2M   99M   6% /boot/efi
-tmpfs                         92M   12K   92M   1% /run/user/1000
-/dev/mapper/aws1_vg-aws1_lv  8.8G   24K  8.3G   1% /mnt/aws1_lv_mount
-/dev/nvme3n1                  14G   24K   13G   1% /mnt/aws1_disk_mount
-root@ip-172-31-6-109:~#
+## Managing Aws ebs on Ec2 instance
+
+- Now Create mount for physical volume directly without any parition or volume groups . 
+- Create a dir in /mnt 
+- Format physical volume 
+- Create mount 
+- Command: mkdir /mnt/aws1_disk_mount
+- Command: mkfs -t ext4 /dev/nvme3n1
+- Command: mount /dev/nvme3n1 /mnt/aws1_disk_mount/
+
+<img width="565" height="330" alt="image" src="https://github.com/user-attachments/assets/fc16733f-1746-4f8e-9bac-208a47ccd0c6" />
+
+- Check using df -h , lsblk command 
+<img width="553" height="521" alt="image" src="https://github.com/user-attachments/assets/2c6349d5-ae69-448d-90eb-0260ca3f1552" />
+
+## Using LVM with EBS for dynamic storage management
+
+Extend extra GB for existing logical volume 
+Command :lvextend -L +5G /dev/aws1_vg/aws1_lv
+<img width="722" height="308" alt="image" src="https://github.com/user-attachments/assets/33e5b6f1-aa01-4ceb-afb1-8a2c7bbc2506" />
+<img width="547" height="306" alt="image" src="https://github.com/user-attachments/assets/a437f6b3-df09-4972-965c-c541bd30a86e" />
+<img width="537" height="251" alt="image" src="https://github.com/user-attachments/assets/42980043-3e36-4326-ad76-a822d2949b62" />
+
