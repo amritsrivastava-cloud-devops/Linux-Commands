@@ -83,3 +83,7 @@
 <img width="547" height="306" alt="image" src="https://github.com/user-attachments/assets/a437f6b3-df09-4972-965c-c541bd30a86e" />
 <img width="537" height="251" alt="image" src="https://github.com/user-attachments/assets/42980043-3e36-4326-ad76-a822d2949b62" />
 
+#### Unmount logic volume 
+- Command : unmount /mnt/aws1_lv_mount
+
+
