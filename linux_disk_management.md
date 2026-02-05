@@ -86,4 +86,12 @@
 #### Unmount logic volume 
 - Command : unmount /mnt/aws1_lv_mount
 
+#### Creating fake disk 
+- Loop device = file pretending to be a disk
+- dd if=/dev/zero of=/tmp/disk1.img bs=1M count=1024 (Creates a 1 GB file filled with zeroes.)
+- losetup -fP /tmp/disk1.img (Now Linux treats this file like a real block device.)
+- losetup -a (Lists all active loop devices.)
+
+<img width="811" height="466" alt="image" src="https://github.com/user-attachments/assets/ce43bac9-3a6f-47f7-a5d1-22dba904f140" />
+
 
